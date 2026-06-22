@@ -1,0 +1,27 @@
+server {
+    listen 80;
+    server_name _;
+
+    # ── Portal static files ──────────────────────────────────────────────
+    root /usr/share/nginx/html;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # ── Proxy to Pipelines (inject API key, enable streaming) ────────────
+    location /api/ {
+        proxy_pass http://pipelines:9099/;
+        proxy_set_header Authorization "Bearer ${PIPELINES_API_KEY}";
+        proxy_set_header Content-Type application/json;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+
+        # Critical for SSE streaming
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 300s;
+        chunked_transfer_encoding on;
+    }
+}

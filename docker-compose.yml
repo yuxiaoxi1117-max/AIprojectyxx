@@ -1,0 +1,56 @@
+services:
+
+  # ── Portal (custom frontend + nginx proxy) ──────────────────────────────
+  portal:
+    image: nginx:alpine
+    container_name: ai-portal
+    ports:
+      - "${PORTAL_PORT:-80}:80"
+    volumes:
+      - ./portal:/usr/share/nginx/html:ro
+      - ./dify_apps.json:/usr/share/nginx/html/apps.json:ro
+      - ./nginx.conf.template:/etc/nginx/templates/default.conf.template:ro
+    environment:
+      - PIPELINES_API_KEY=${PIPELINES_API_KEY:-0p3n-w3bu!}
+    depends_on:
+      - pipelines
+    restart: unless-stopped
+
+  # ── Pipelines (Dify API bridge) ─────────────────────────────────────────
+  pipelines:
+    image: ghcr.io/open-webui/pipelines:main
+    container_name: ai-pipelines
+    expose:
+      - "9099"
+    volumes:
+      - ./pipelines:/app/pipelines
+      - ./dify_apps.json:/app/dify_apps.json:ro
+    environment:
+      - PIPELINES_API_KEY=${PIPELINES_API_KEY:-0p3n-w3bu!}
+      - DIFY_BASE_URL=${DIFY_BASE_URL}
+    restart: unless-stopped
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
+  # ── Open WebUI (optional, advanced use) ─────────────────────────────────
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    ports:
+      - "${OPEN_WEBUI_PORT:-3000}:8080"
+    volumes:
+      - open-webui-data:/app/backend/data
+    environment:
+      - ENABLE_OLLAMA_API=false
+      - OPENAI_API_BASE_URL=http://pipelines:9099
+      - OPENAI_API_KEY=${PIPELINES_API_KEY:-0p3n-w3bu!}
+      - WEBUI_NAME=${WEBUI_NAME:-AI 助手平台}
+      - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY:-changeme-secret-key}
+    depends_on:
+      - pipelines
+    restart: unless-stopped
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
+volumes:
+  open-webui-data:

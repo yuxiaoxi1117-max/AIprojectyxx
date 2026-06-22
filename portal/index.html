@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI 助手平台</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <span class="logo-icon">✨</span>
+        <span class="logo-text">AI 平台</span>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-tab="chat" onclick="switchTab('chat')">
+          <span class="nav-icon">💬</span>
+          <span>对话</span>
+        </button>
+        <button class="nav-item" data-tab="tools" onclick="switchTab('tools')">
+          <span class="nav-icon">🛠️</span>
+          <span>工具</span>
+        </button>
+      </nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main">
+
+      <!-- ── 对话 Tab ── -->
+      <div id="tab-chat" class="tab-panel active">
+        <div class="chat-layout">
+          <div class="chat-header">
+            <span id="chat-model-name">通用助手</span>
+            <span class="chat-subtitle">主页对话</span>
+          </div>
+          <div class="messages" id="chat-messages"></div>
+          <div class="input-area">
+            <textarea
+              id="chat-input"
+              placeholder="输入消息，Shift+Enter 换行，Enter 发送…"
+              rows="1"
+              onkeydown="handleChatKey(event)"
+              oninput="autoResize(this)"
+            ></textarea>
+            <button class="send-btn" id="chat-send" onclick="sendChat()">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 工具 Tab ── -->
+      <div id="tab-tools" class="tab-panel">
+
+        <!-- Tools grid view -->
+        <div id="tools-grid-view">
+          <div class="tools-header">
+            <h2>工具集</h2>
+            <p class="tools-subtitle">选择一个应用开始对话</p>
+          </div>
+          <div class="tools-grid" id="tools-grid"></div>
+        </div>
+
+        <!-- App chat view (slide in when card clicked) -->
+        <div id="tools-chat-view" class="hidden">
+          <div class="chat-layout">
+            <div class="chat-header">
+              <button class="back-btn" onclick="backToTools()">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                  <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                </svg>
+                返回工具
+              </button>
+              <span id="tool-chat-title">助手</span>
+              <span class="chat-subtitle" id="tool-chat-desc"></span>
+            </div>
+            <div class="messages" id="tool-messages"></div>
+            <div class="input-area">
+              <textarea
+                id="tool-input"
+                placeholder="输入消息，Shift+Enter 换行，Enter 发送…"
+                rows="1"
+                onkeydown="handleToolKey(event)"
+                oninput="autoResize(this)"
+              ></textarea>
+              <button class="send-btn" id="tool-send" onclick="sendTool()">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                  <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
