@@ -3,20 +3,39 @@ services:
     image: ghcr.io/open-webui/open-webui:main
     container_name: open-webui
     ports:
-      - "3000:8080"
+      - "${OPEN_WEBUI_PORT:-3000}:8080"
     volumes:
       - open-webui-data:/app/backend/data
     environment:
-      # Disable Ollama (we're using Dify as backend)
       - ENABLE_OLLAMA_API=false
-      # Use Dify as OpenAI-compatible API
-      - OPENAI_API_BASE_URL=${DIFY_API_BASE_URL}/v1
-      - OPENAI_API_KEY=${DIFY_API_KEY}
-      # Optional: app name shown in UI
+      # Point Open WebUI to the Pipelines server as its OpenAI backend
+      - OPENAI_API_BASE_URL=http://pipelines:9099
+      - OPENAI_API_KEY=${PIPELINES_API_KEY:-0p3n-w3bu!}
       - WEBUI_NAME=${WEBUI_NAME:-Open WebUI + Dify}
-      # Allow all origins for internal network use
-      - CORS_ALLOW_ORIGIN=*
+      - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY:-changeme-secret-key}
+    depends_on:
+      - pipelines
     restart: unless-stopped
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
+  pipelines:
+    image: ghcr.io/open-webui/pipelines:main
+    container_name: open-webui-pipelines
+    ports:
+      - "9099:9099"
+    volumes:
+      # Auto-loads all .py files in this directory as pipelines
+      - ./pipelines:/app/pipelines
+    environment:
+      - PIPELINES_API_KEY=${PIPELINES_API_KEY:-0p3n-w3bu!}
+      # Injected into dify_pipeline.py via os.getenv
+      - DIFY_BASE_URL=${DIFY_BASE_URL}
+      - DIFY_API_KEY=${DIFY_API_KEY}
+      - DIFY_APP_NAME=${DIFY_APP_NAME:-Dify}
+    restart: unless-stopped
+    extra_hosts:
+      - host.docker.internal:host-gateway
 
 volumes:
   open-webui-data:
