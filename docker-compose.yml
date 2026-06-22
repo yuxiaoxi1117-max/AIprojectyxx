@@ -1,0 +1,22 @@
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    ports:
+      - "3000:8080"
+    volumes:
+      - open-webui-data:/app/backend/data
+    environment:
+      # Disable Ollama (we're using Dify as backend)
+      - ENABLE_OLLAMA_API=false
+      # Use Dify as OpenAI-compatible API
+      - OPENAI_API_BASE_URL=${DIFY_API_BASE_URL}/v1
+      - OPENAI_API_KEY=${DIFY_API_KEY}
+      # Optional: app name shown in UI
+      - WEBUI_NAME=${WEBUI_NAME:-Open WebUI + Dify}
+      # Allow all origins for internal network use
+      - CORS_ALLOW_ORIGIN=*
+    restart: unless-stopped
+
+volumes:
+  open-webui-data:
