@@ -1,0 +1,31 @@
+[
+  {
+    "id": "general-chat",
+    "name": "通用助手",
+    "description": "主页默认对话助手",
+    "api_key": "app-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "icon": "🤖",
+    "default": true
+  },
+  {
+    "id": "customer-service",
+    "name": "客服助手",
+    "description": "处理客户咨询与售后问题",
+    "api_key": "app-yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+    "icon": "💬"
+  },
+  {
+    "id": "code-helper",
+    "name": "代码助手",
+    "description": "帮助编写、调试和审查代码",
+    "api_key": "app-zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+    "icon": "💻"
+  },
+  {
+    "id": "doc-analyst",
+    "name": "文档分析",
+    "description": "分析文档、提取关键信息",
+    "api_key": "app-wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww",
+    "icon": "📄"
+  }
+]

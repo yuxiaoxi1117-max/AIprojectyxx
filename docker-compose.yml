@@ -1,4 +1,38 @@
 services:
+
+  # ── Portal (custom frontend + nginx proxy) ──────────────────────────────
+  portal:
+    image: nginx:alpine
+    container_name: ai-portal
+    ports:
+      - "${PORTAL_PORT:-80}:80"
+    volumes:
+      - ./portal:/usr/share/nginx/html:ro
+      - ./dify_apps.json:/usr/share/nginx/html/apps.json:ro
+      - ./nginx.conf.template:/etc/nginx/templates/default.conf.template:ro
+    environment:
+      - PIPELINES_API_KEY=${PIPELINES_API_KEY:-0p3n-w3bu!}
+    depends_on:
+      - pipelines
+    restart: unless-stopped
+
+  # ── Pipelines (Dify API bridge) ─────────────────────────────────────────
+  pipelines:
+    image: ghcr.io/open-webui/pipelines:main
+    container_name: ai-pipelines
+    expose:
+      - "9099"
+    volumes:
+      - ./pipelines:/app/pipelines
+      - ./dify_apps.json:/app/dify_apps.json:ro
+    environment:
+      - PIPELINES_API_KEY=${PIPELINES_API_KEY:-0p3n-w3bu!}
+      - DIFY_BASE_URL=${DIFY_BASE_URL}
+    restart: unless-stopped
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
+  # ── Open WebUI (optional, advanced use) ─────────────────────────────────
   open-webui:
     image: ghcr.io/open-webui/open-webui:main
     container_name: open-webui
@@ -8,31 +42,12 @@ services:
       - open-webui-data:/app/backend/data
     environment:
       - ENABLE_OLLAMA_API=false
-      # Point Open WebUI to the Pipelines server as its OpenAI backend
       - OPENAI_API_BASE_URL=http://pipelines:9099
       - OPENAI_API_KEY=${PIPELINES_API_KEY:-0p3n-w3bu!}
-      - WEBUI_NAME=${WEBUI_NAME:-Open WebUI + Dify}
+      - WEBUI_NAME=${WEBUI_NAME:-AI 助手平台}
       - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY:-changeme-secret-key}
     depends_on:
       - pipelines
-    restart: unless-stopped
-    extra_hosts:
-      - host.docker.internal:host-gateway
-
-  pipelines:
-    image: ghcr.io/open-webui/pipelines:main
-    container_name: open-webui-pipelines
-    ports:
-      - "9099:9099"
-    volumes:
-      # Auto-loads all .py files in this directory as pipelines
-      - ./pipelines:/app/pipelines
-    environment:
-      - PIPELINES_API_KEY=${PIPELINES_API_KEY:-0p3n-w3bu!}
-      # Injected into dify_pipeline.py via os.getenv
-      - DIFY_BASE_URL=${DIFY_BASE_URL}
-      - DIFY_API_KEY=${DIFY_API_KEY}
-      - DIFY_APP_NAME=${DIFY_APP_NAME:-Dify}
     restart: unless-stopped
     extra_hosts:
       - host.docker.internal:host-gateway
